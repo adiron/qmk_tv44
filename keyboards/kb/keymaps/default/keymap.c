@@ -1,5 +1,5 @@
 #include "kb.h"
-
+#include "eeconfig.h"
 // Layers
 #define QWERTY 0
 #define RAISE 1
@@ -11,6 +11,8 @@
 // Fillers to make layering more clear
 #define _______ KC_TRNS
 #define XXXXXXX KC_NO
+
+extern keymap_config_t keymap_config;
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [QWERTY] = {
@@ -35,7 +37,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         {KC_TRNS,  KC_SLCK,   KC_PAUS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS},
         {KC_TRNS,   KC_VOLU,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS, KC_MEDIA_REWIND, KC_MPLY, KC_MEDIA_FAST_FORWARD, KC_TRNS, KC_TRNS},
         {KC_TRNS,   KC_VOLD,   BL_TOGG,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS, KC_TRNS, KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS},
-        {RESET, KC_TRNS,  KC_TRNS, KC_TRNS, XXXXXXX, XXXXXXX, XXXXXXX,    KC_TRNS,     KC_TRNS, KC_TRNS, XXXXXXX, KC_TRNS}
+        {RESET, KC_TRNS,  KC_TRNS, KC_TRNS, XXXXXXX, XXXXXXX, XXXXXXX,    KC_TRNS,     KC_TRNS, AG_NORM, XXXXXXX, AG_SWAP}
     },
     [MOUSE] = {
         {KC_TRNS,  KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_BTN1,   KC_BTN2,   KC_TRNS,   KC_TRNS,   KC_TRNS,   KC_TRNS},
@@ -70,34 +72,71 @@ const uint16_t PROGMEM fn_actions[] = {
 const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt) {
     keyevent_t event = record->event;
 
+    if (!eeconfig_is_enabled()) {
+      eeconfig_init();
+    }
+    bool use_cmd = true;    // Use, for example, Cmd-Tab, Cmd-C, Cmd-V, etc.
+    // Compare to MAGIC_SWAP_ALT_GUI and MAGIC_UNSWAP_ALT_GUI configs, set in:
+    // quantum/quantum.c
+    if(keymap_config.swap_lalt_lgui == 1 && keymap_config.swap_ralt_rgui == 1) {
+      use_cmd = false;      // ... or, Alt-Tab, Ctrl-C, Ctrl-V, etc.
+    }
     switch (id) {
         case 0:
-            /* Command + [ */
-            return (event.pressed ? MACRO( D(LGUI), T(LBRC), U(LGUI), END ) : MACRO(END));
+            /* Command + [ or previous page */
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), T(LBRC), U(LGUI), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( D(LALT), T(LEFT), U(LALT), END ) : MACRO(END));
+            }
             break;
         case 1:
-            /* Command + ] */
-            return (event.pressed ? MACRO( D(LGUI), T(RBRC), U(LGUI), END ) : MACRO(END));
+            /* Command + ] or next page */
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), T(RBRC), U(LGUI), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( D(LALT), T(RIGHT), U(LALT), END ) : MACRO(END));
+            }
             break;
         case 2:
-            /* Command + { */
-            return (event.pressed ? MACRO( D(LGUI), D(RSFT), T(LBRC), U(RSFT), U(LGUI), END ) : MACRO(END));
+            /* Command + { or prev tab. */
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), D(RSFT), T(LBRC), U(RSFT), U(LGUI), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( D(LCTRL), D(RSFT), T(TAB), U(RSFT), U(LCTRL), END ) : MACRO(END));
+            }
             break;
         case 3:
-            /* Command + } */
-            return (event.pressed ? MACRO( D(LGUI), D(RSFT), T(RBRC), U(RSFT), U(LGUI), END ) : MACRO(END));
+            /* Command + } or next tab*/
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), D(RSFT), T(RBRC), U(RSFT), U(LGUI), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( D(LCTRL), T(TAB), U(LCTRL), END ) : MACRO(END));
+            }
             break;
         case 4:
-            /* Command + - */
-            return (event.pressed ? MACRO( D(LGUI), T(MINS), U(LGUI), END ) : MACRO(END));
+            /* Command + - or Ctrl + -*/
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), T(MINS), U(LGUI), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( D(LCTRL), T(MINS), U(LCTRL), END ) : MACRO(END));
+            }
             break;
         case 5:
-            /* Command + = */
-            return (event.pressed ? MACRO( D(LGUI), T(EQL), U(LGUI), END ) : MACRO(END));
+            /* Command + = or Ctrl + =*/
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), T(EQL), U(LGUI), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( D(LCTRL), T(EQL), U(LCTRL), END ) : MACRO(END));
+            }
             break;
         case 6:
-            /* Command + Enter */
-            return (event.pressed ? MACRO( D(LGUI), T(ENT), U(LGUI), END ) : MACRO(END));
+            /* Command + Enter or Ctrl + Enter*/
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), T(ENT), U(LGUI), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( D(LCTRL), T(ENT), U(LCTRL), END ) : MACRO(END));
+            }
         default:
             break;
     }
