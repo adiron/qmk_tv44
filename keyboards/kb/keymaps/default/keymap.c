@@ -7,7 +7,7 @@
 #define UTILS 3
 #define MOUSE 4
 #define RAISX 5
-#define ADJUST 5
+#define ADJUST 6
 
 #define M_BACK 0
 #define M_FWRD 1
