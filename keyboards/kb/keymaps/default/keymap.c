@@ -16,6 +16,7 @@
 #define M_ZOUT 4
 #define M_ZOIN 5
 #define M_ENTR 6
+#define M_SCRN 7
 
 // Fillers to make layering more clear
 #define _______ KC_TRNS
@@ -64,7 +65,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         {KC_TRNS, RESET, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS},
         {KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS},
         {KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS},
-        {KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, XXXXXXX, XXXXXXX, XXXXXXX, KC_TRNS, KC_TRNS, AG_NORM, XXXXXXX, AG_SWAP}
+        {KC_TRNS, KC_TRNS, KC_TRNS, M(M_SCRN), XXXXXXX, XXXXXXX, XXXXXXX, KC_TRNS, KC_TRNS, AG_NORM, XXXXXXX, AG_SWAP}
     }
 };
 
@@ -144,6 +145,13 @@ const macro_t *action_get_macro(keyrecord_t *record, uint8_t id, uint8_t opt) {
                 return (event.pressed ? MACRO( D(LGUI), T(ENT), U(LGUI), END ) : MACRO(END));
             } else {
                 return (event.pressed ? MACRO( D(LCTRL), T(ENT), U(LCTRL), END ) : MACRO(END));
+            }
+        case M_SCRN:
+            /* Command + Enter or Ctrl + Enter*/
+            if (use_cmd) {
+                return (event.pressed ? MACRO( D(LGUI), D(LCTRL), D(LSFT), T(4), U(LSFT), U(LGUI), U(LCTRL), END ) : MACRO(END));
+            } else {
+                return (event.pressed ? MACRO( T(PSCR) ) : MACRO(END));
             }
         default:
             break;
